@@ -1,0 +1,13 @@
+gradeviewer-tool/
+│
+├── index.html           # Main user interface
+├── README.md            # Setup instructions
+│
+├── css/
+│   └── style.css        # Formal styling (Dark/Light mode)
+│
+├── js/
+│   └── app.js           # Logic for charts, PDF, and data fetching
+│
+└── backend/
+    └── Code.gs          # Google Apps Script (Server-side logic)
