@@ -1,8 +1,7 @@
 // ==========================================
 // ⚠️ CONFIGURE YOUR BACKEND URL HERE
 // ==========================================
-const SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
-
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbdNWwSitI1A7Qs1x2IvMpOyjQq5OST5nClv6kpc25qT_2WEUbqPA33msgu8YNZYM2/exec";
 let chartInstance = null;
 
 // --- Background Animation (Network/Nodes) ---
@@ -33,20 +32,20 @@ class Node {
   }
 }
 
-function initAnim() { nodes = []; for(let i=0; i<40; i++) nodes.push(new Node()); }
+function initAnim() { nodes = []; for (let i = 0; i < 40; i++) nodes.push(new Node()); }
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text-muted');
   ctx.lineWidth = 0.1;
-  
-  for (let i=0; i<nodes.length; i++) {
+
+  for (let i = 0; i < nodes.length; i++) {
     nodes[i].update(); nodes[i].draw();
-    for (let j=i; j<nodes.length; j++) {
+    for (let j = i; j < nodes.length; j++) {
       let dx = nodes[i].x - nodes[j].x;
       let dy = nodes[i].y - nodes[j].y;
-      let dist = Math.sqrt(dx*dx + dy*dy);
+      let dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < 150) {
-        ctx.globalAlpha = 1 - (dist/150);
+        ctx.globalAlpha = 1 - (dist / 150);
         ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
       }
     }
@@ -57,44 +56,44 @@ initAnim(); animate();
 
 // --- Data Logic ---
 function fetchGrades() {
-  const id = document.getElementById('hashIdInput').value;
+  const id = document.getElementById('nameInput').value;
   const btn = document.querySelector('.btn-formal');
   const err = document.getElementById('error-msg');
 
   if (!id) return;
   btn.textContent = 'Verifying Credentials...'; btn.disabled = true; err.style.display = 'none';
 
-  fetch(SCRIPT_URL + "?id=" + encodeURIComponent(id), { redirect: "follow", credentials: 'omit' })
-  .then(res => res.json())
-  .then(data => {
-    if (data.found) {
-      renderDashboard(data);
-    } else {
-      err.textContent = "Identifier not found in database.";
+  fetch(SCRIPT_URL + "?name=" + encodeURIComponent(id), { redirect: "follow", credentials: 'omit' })
+    .then(res => res.json())
+    .then(data => {
+      if (data.found) {
+        renderDashboard(data);
+      } else {
+        err.textContent = "Identifier not found in database.";
+        err.style.display = 'block';
+        resetBtn();
+      }
+    })
+    .catch(e => {
+      console.error(e);
+      err.textContent = "Unable to connect to server.";
       err.style.display = 'block';
       resetBtn();
-    }
-  })
-  .catch(e => {
-    console.error(e);
-    err.textContent = "Unable to connect to server.";
-    err.style.display = 'block';
-    resetBtn();
-  });
+    });
 }
 
 function refreshDashboard(btn) {
-  const id = document.getElementById('hashIdInput').value;
-  if(!id) return;
+  const id = document.getElementById('nameInput').value;
+  if (!id) return;
   const origText = btn.innerHTML;
   btn.innerHTML = 'Loading...'; btn.disabled = true;
 
-  fetch(SCRIPT_URL + "?id=" + encodeURIComponent(id), { redirect: "follow", credentials: 'omit' })
-  .then(res => res.json())
-  .then(data => {
-    if (data.found) renderDashboard(data);
-    btn.innerHTML = origText; btn.disabled = false;
-  });
+  fetch(SCRIPT_URL + "?name=" + encodeURIComponent(id), { redirect: "follow", credentials: 'omit' })
+    .then(res => res.json())
+    .then(data => {
+      if (data.found) renderDashboard(data);
+      btn.innerHTML = origText; btn.disabled = false;
+    });
 }
 
 function resetBtn() {
@@ -119,7 +118,7 @@ function renderDashboard(data) {
     let avg = parseFloat(item.avg) || 0;
 
     if (item.category !== "Hashed ID" && item.category !== "Name") {
-       tbody.innerHTML += `
+      tbody.innerHTML += `
         <tr>
           <td class="fw-medium">${item.category}</td>
           <td class="text-center score-cell">${sDisplay}</td>
@@ -145,7 +144,7 @@ function renderChart(l, m, a) {
   const color = isDark ? '#e0e0e0' : '#2c3e50';
   const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
   const primaryColor = getComputedStyle(document.body).getPropertyValue('--primary');
-  
+
   chartInstance = new Chart(document.getElementById('gradeChart'), {
     type: 'bar',
     data: {
@@ -169,21 +168,21 @@ function renderChart(l, m, a) {
 function downloadPDF() {
   const el = document.getElementById('print-area');
   const studentName = document.getElementById('studentNameDisplay').textContent || "Student";
-  
+
   document.querySelector('.action-grid').style.display = 'none';
   document.querySelector('.d-print-none').style.display = 'none';
   document.querySelector('.pdf-header').style.display = 'block';
-  
+
   const now = new Date();
   const dateStr = now.toISOString().split('T')[0];
   const filename = `${studentName.replace(/\s+/g, '_')}_Grade_Report_${dateStr}.pdf`;
 
-  html2pdf().set({ 
-      margin: 0.5, 
-      filename: filename, 
-      image: { type: 'jpeg', quality: 0.98 }, 
-      html2canvas: { scale: 2 }, 
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
+  html2pdf().set({
+    margin: 0.5,
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
   }).from(el).save().then(() => {
     document.querySelector('.action-grid').style.display = 'grid';
     document.querySelector('.d-print-none').style.display = 'block';
@@ -196,16 +195,16 @@ function toggleTheme() {
   const d = b.getAttribute('data-theme') === 'dark';
   b.setAttribute('data-theme', d ? 'light' : 'dark');
   localStorage.setItem('theme', d ? 'light' : 'dark');
-  
+
   document.getElementById('themeIcon').className = d ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
-  if(chartInstance) {
-     // Re-render chart to update colors
-     const data = chartInstance.config.data;
-     renderChart(data.labels, data.datasets[0].data, data.datasets[1].data);
+  if (chartInstance) {
+    // Re-render chart to update colors
+    const data = chartInstance.config.data;
+    renderChart(data.labels, data.datasets[0].data, data.datasets[1].data);
   }
 }
 
-if(localStorage.getItem('theme')==='dark') toggleTheme();
+if (localStorage.getItem('theme') === 'dark') toggleTheme();
 
 function logout() {
   location.reload();
