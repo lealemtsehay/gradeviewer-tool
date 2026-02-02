@@ -1,7 +1,7 @@
 // ==========================================
 // ⚠️ CONFIGURE YOUR BACKEND URL HERE
 // ==========================================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbdNWwSitI1A7Qs1x2IvMpOyjQq5OST5nClv6kpc25qT_2WEUbqPA33msgu8YNZYM2/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgj0uRc59xMTllmyjX75ZbON5waO9nFKmkLH5rMkxPoDW65uwespQHT8zsUWC38q06rg/exec";
 let chartInstance = null;
 
 // --- Background Animation (Network/Nodes) ---
