@@ -1,16 +1,16 @@
 function doGet(e) {
-  var searchId = e.parameter.id;
-  if (!searchId) return ContentService.createTextOutput(JSON.stringify({found:false, message:"System Ready"}));
+  var searchName = e.parameter.name;
+  if (!searchName) return ContentService.createTextOutput(JSON.stringify({found:false, message:"System Ready"}));
 
   try {
-    var result = findStudent(searchId);
+    var result = findStudent(searchName);
     return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({found:false, message:err.toString()}));
   }
 }
 
-function findStudent(searchId) {
+function findStudent(searchName) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
   var data = sheet.getDataRange().getValues();
   
@@ -36,9 +36,11 @@ function findStudent(searchId) {
 
   for (var i = ROW_STUDENT_START; i < data.length; i++) {
     var row = data[i];
-    var currentId = String(row[0]).trim().toUpperCase();
+    // Column 1 is typically Name, Column 0 was ID
+    var currentName = String(row[1]).trim().toLowerCase();
     
-    if (currentId == String(searchId).trim().toUpperCase()) {
+    // Compare inputs (case-insensitive)
+    if (currentName == String(searchName).trim().toLowerCase()) {
       var studentResult = [];
       var studentTotal = parseFloat(row[COL_TOTAL]) || 0;
       var totalMax = (maxRow[COL_TOTAL]) ? maxRow[COL_TOTAL] : 100;
@@ -61,7 +63,7 @@ function findStudent(searchId) {
 
       return {
         found: true,
-        studentName: row[1],
+        studentName: row[1], // Return the original casing from the sheet
         data: studentResult,
         totalScore: studentTotal,
         totalMax: totalMax,
